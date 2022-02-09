@@ -11,13 +11,15 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.callbacks import EarlyStopping
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 
 
 
 
 class Compress():
 
-    def __init__(self, train_data, train_input, validation_fraction  = 0.5, n_ensemble = 3, max_hidden = 3, hidden_size = 25, n_epochs = 200, patience = 20, activation='relu', loss = 'mean_squared_error', optimizer = 'adam', save_dir  = 'models/'):
+    def __init__(self, train_data, train_input, validation_fraction  = 0.5, n_ensemble = 3, max_hidden = 3, hidden_size = 25, n_epochs = 200, patience = 20,  activation='relu', loss = 'mean_squared_error', optimizer = 'adam', save_dir  = 'models/', data_standardization = None,):
 
         self.train_data = train_data
         self.train_input = train_input
@@ -32,6 +34,7 @@ class Compress():
         self.optimizer = optimizer
         self.n_ensemble = n_ensemble
         self.save_dir = save_dir
+        self.data_standardization =  data_standardization
 
         #get the number of data points
         self.n_features = np.shape(self.train_data)[1]
@@ -42,6 +45,26 @@ class Compress():
         n_train = int(n_data * self.validation_fraction)
         self.trainX, self.testX = self.train_data[:n_train, :], self.train_data[n_train:, :]
         self.trainy, self.testy = self.train_input[:n_train], self.train_input[n_train:]
+
+
+    def standardize_input(self):
+        if self.data_standardization == None:
+            pass
+        elif self.data_standardization == 'MinMaxScaler':
+            print ('Standardizing Input')
+            scalar = MinMaxScaler()
+            scalar.fit(np.vstack((self.trainX,self.testX)))
+            self.trainX = scalar.transform(self.trainX)
+            self.testX = scalar.transform(self.testX)
+        elif self.data_standardization =='StandardScaler':
+            print ('Standardizing Input')
+            scalar = StandardScaler()
+            scalar.fit(np.vstack((self.trainX,self.testX)))
+            self.trainX = scalar.transform(self.trainX)
+            self.testX = scalar.transform(self.testX)
+        else:
+            print ('Error:data_standardization must be None, "MinMaxScaler", or "StandardScaler."')
+            
 
 
     def train_network(self, n_hidden):
@@ -63,6 +86,7 @@ class Compress():
 
 
     def ensemble_train(self):
+        self.standardize_input()
         self.model_list = []
         self.test_mse_list = []
         for ensemble in range(self.n_ensemble):
