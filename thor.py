@@ -9,7 +9,11 @@ from sklearn.datasets import make_regression
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
-from tensorflow.keras.optimizers import SGD
+#trialing dropout
+#from tensorflow.keras.layers import Dropout
+#trialing regularlizers
+#from tensorflow.keras.regularizers import l2
+#from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.callbacks import EarlyStopping
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
@@ -19,7 +23,7 @@ from sklearn.preprocessing import StandardScaler
 
 class Compress():
 
-    def __init__(self, train_data, train_input, validation_fraction  = 0.5, n_ensemble = 3, max_hidden = 3, hidden_size = 25, n_epochs = 200, patience = 20,  activation='relu', loss = 'mean_squared_error', optimizer = 'adam', save_dir  = 'models/', data_standardization = None,):
+    def __init__(self, train_data, train_input, validation_fraction  = 0.5, n_ensemble = 3, max_hidden = 3, hidden_size = 25, n_epochs = 200, patience = 20,  activation='relu', loss = 'mean_squared_error', optimizer = 'adam', save_dir  = 'models/', data_standardization = None):
 
         self.train_data = train_data
         self.train_input = train_input
@@ -69,10 +73,15 @@ class Compress():
 
     def train_network(self, n_hidden):
         model = Sequential()
+        #trialling a droput layer
+        #model.add(Dropout(0.2, input_shape=(self.n_features,)))
         model.add(Dense(self.hidden_size, input_dim = self.n_features, activation = self.activation))
         for i in range(n_hidden):
             model.add(Dense(self.hidden_size, input_dim= self.hidden_size, activation = self.activation))
         model.add(Dense(self.param_size, activation='linear'))
+        #trialing SGD
+        #sgd = SGD(lr=0.01, momentum=0.8)
+        #model.compile(loss = self.loss, optimizer = sgd)
         model.compile(loss = self.loss, optimizer = self.optimizer)
         es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience= self.patience)
         
