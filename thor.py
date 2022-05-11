@@ -23,7 +23,7 @@ from sklearn.preprocessing import StandardScaler
 
 class Compress():
 
-    def __init__(self, train_data, train_input, validation_fraction  = 0.5, n_ensemble = 3, max_hidden = 3, hidden_size = 25, n_epochs = 200, patience = 20,  activation='relu', loss = 'mean_squared_error', optimizer = 'adam', save_dir  = 'models/', data_standardization = None):
+    def __init__(self, train_data, train_input, validation_fraction  = 0.5, n_ensemble = 3, max_hidden = 3, hidden_size = 25, n_epochs = 200, patience = 20,  activation='relu', loss = 'mean_squared_error', optimizer = 'adam', save_dir  = 'models/', data_standardization = None, max_depth = True):
 
         self.train_data = train_data
         self.train_input = train_input
@@ -39,6 +39,7 @@ class Compress():
         self.n_ensemble = n_ensemble
         self.save_dir = save_dir
         self.data_standardization =  data_standardization
+        self.max_depth = max_depth
 
         #get the number of data points
         self.n_features = np.shape(self.train_data)[1]
@@ -99,11 +100,19 @@ class Compress():
         self.model_list = []
         self.test_mse_list = []
         for ensemble in range(self.n_ensemble):
-            for n_hidden in range(self.max_hidden):
+            if self.max_depth == False:
+                for n_hidden in range(self.max_hidden):
+                    print ('Training: Ensemble %s, Network %s' %(ensemble + 1, n_hidden + 1))
+                    model, test_mse = self.train_network(n_hidden)
+                    self.model_list += [model]
+                    self.test_mse_list += [test_mse]
+            elif self.max_depth == True:
+                n_hidden = self.max_hidden - 1
                 print ('Training: Ensemble %s, Network %s' %(ensemble + 1, n_hidden + 1))
                 model, test_mse = self.train_network(n_hidden)
                 self.model_list += [model]
                 self.test_mse_list += [test_mse]
+
         return 0.
 
 
