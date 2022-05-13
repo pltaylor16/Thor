@@ -23,7 +23,7 @@ from sklearn.preprocessing import StandardScaler
 
 class Compress():
 
-    def __init__(self, train_data, train_input, validation_fraction  = 0.5, n_ensemble = 3, max_hidden = 3, hidden_size = 25, n_epochs = 200, patience = 20,  activation='relu', loss = 'mean_squared_error', optimizer = 'adam', save_dir  = 'models/', data_standardization = None, max_depth = True):
+    def __init__(self, train_data, train_input, validation_fraction  = 0.5, n_ensemble = 3, max_hidden = 3, hidden_size = 25, batch_size = 32, n_epochs = 200, patience = 20,  activation='relu', loss = 'mean_squared_error', optimizer = 'adam', save_dir  = 'models/', data_standardization = None, max_depth = True):
 
         self.train_data = train_data
         self.train_input = train_input
@@ -40,6 +40,7 @@ class Compress():
         self.save_dir = save_dir
         self.data_standardization =  data_standardization
         self.max_depth = max_depth
+        self.batch_size = batch_size
 
         #get the number of data points
         self.n_features = np.shape(self.train_data)[1]
@@ -87,7 +88,7 @@ class Compress():
         es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience= self.patience)
         
         #you are now here in the code
-        history = model.fit(self.trainX, self.trainy, validation_data=(self.testX, self.testy), epochs=self.n_epochs, callbacks=[es])
+        history = model.fit(self.trainX, self.trainy, validation_data=(self.testX, self.testy), batch_size=self.batch_size, epochs=self.n_epochs, callbacks=[es])
         # evaluate the model
         train_mse = model.evaluate(self.trainX, self.trainy)
         test_mse = model.evaluate(self.testX, self.testy)
